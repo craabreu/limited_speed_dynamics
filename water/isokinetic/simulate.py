@@ -65,7 +65,7 @@ else:
             force.setForceGroup(1)
     loops = [2*args.timestep, 1]
 
-integrator = atomsmm.integrators.LimitedSpeedNHLIntegrator(dt, loops, temp, tau, gamma, L=args.L)
+integrator = atomsmm.integrators.LimitedSpeedStochasticIntegrator(dt, loops, temp, tau, gamma, L=args.L)
 
 simulation = openmm.app.Simulation(pdb.topology, respa_system, integrator, platform, properties)
 simulation.context.setPositions(pdb.positions)
