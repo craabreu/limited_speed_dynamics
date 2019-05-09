@@ -36,7 +36,7 @@ properties='Temp PotEng Press MolPress'
 
 name=dt${case[$1]}fs
 cd $name
-for L in 1; do
+for L in 1 2 4; do
   python simulate.py --device ${device[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]} --L $L
 
   dt=$(echo ${case[$1]} | sed 's/p/./')
