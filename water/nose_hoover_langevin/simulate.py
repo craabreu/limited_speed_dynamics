@@ -15,6 +15,7 @@ parser.add_argument('--timestep', dest='timestep', help='time step size', type=i
 parser.add_argument('--nsteps', dest='nsteps', help='number of steps', type=int, required=True)
 parser.add_argument('--L', dest='L', help='the L parameter', type=int, default=1)
 parser.add_argument('--device', dest='device', help='the GPU device', default='None')
+parser.add_argument('--secdev', dest='secdev', help='the secondary GPU device', default='None')
 parser.add_argument('--seed', dest='seed', help='the RNG seed', type=int, default=0)
 parser.add_argument('--platform', dest='platform', help='the computation platform', default='CUDA')
 args = parser.parse_args()
@@ -22,7 +23,7 @@ args = parser.parse_args()
 seed = random.SystemRandom().randint(0, 2**31) if args.seed == 0 else args.seed
 print(f'Employed RNG seed is {seed}')
 
-base = f'dt{args.timestep:02d}fs'
+base = f'dt{args.timestep:02d}fs-L{args.L}'
 platform_name = args.platform
 
 dt = args.timestep*unit.femtoseconds
@@ -72,7 +73,8 @@ simulation.context.setVelocitiesToTemperature(temp, seed)
 
 computer = atomsmm.PressureComputer(openmm_system,
         pdb.topology,
-        openmm.Platform.getPlatformByName('CPU'),
+        openmm.Platform.getPlatformByName('CUDA'),
+        dict(Precision='mixed', DeviceIndex=args.secdev),
         temperature=temp)
 
 dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separator=',',
@@ -84,6 +86,6 @@ dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separat
         pressureComputer=computer,
         speed=True,
         extraFile=f'{base}.csv')
-simulation.reporters.append(dataReporter)
 
+simulation.reporters += [dataReporter]
 simulation.step(args.nsteps)
